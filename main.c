@@ -51,7 +51,7 @@ void afficherPile(Pile *pile) {
     Element *elementCourant = pile->premier;
 
     while(elementCourant != NULL) {
-        printf("%d\n", (int*)elementCourant->donnee);
+        printf("%d\n", elementCourant->donnee);
         elementCourant = elementCourant->suivant;
     }
     printf("\n");
@@ -72,28 +72,27 @@ File *initialiserFile() {
 }
 
 void enfiler(File *file, void *donnee) {
-    Element *nouveau = malloc(sizeof(*nouveau));
+    Element *element = malloc(sizeof(*element));
 
-    if(file == NULL || nouveau == NULL) {
+    if(file == NULL || element == NULL) {
         exit(EXIT_FAILURE);
     }
 
-    nouveau->donnee = donnee;
-    nouveau->suivant = NULL;
+    element->donnee = donnee;
+    element->suivant = NULL;
 
-    if(file->premier != NULL) {
-        Element *elementActuel = file->premier;
-
-        while(elementActuel != NULL) {
-            elementActuel->suivant;
-        }
-        elementActuel->suivant = nouveau;
+    if(file->premier == NULL) {
+        file->premier = element;
     } else {
-        file->premier = nouveau;
+        Element *courant = file->premier;
+        while(courant->suivant != NULL) {
+            courant = courant->suivant;
+        }
+        courant->suivant = element;
     }
 }
 
-int defiler(File *file) {
+void *defiler(File *file) {
     if(file == NULL) {
         exit(EXIT_FAILURE);
     }
@@ -101,29 +100,40 @@ int defiler(File *file) {
     void *donnee = 0;
 
     if(file->premier != NULL) {
-        Element *element = file->premier;
-
-        donnee = element->donnee;
-        file->premier = element->suivant;
-        free(element);
+        Element *aSupprimer = file->premier;
+        donnee = aSupprimer->donnee;
+        file->premier = aSupprimer->suivant;
+        free(aSupprimer);
     }
 
     return donnee;
 }
 
 void afficherFile(File *file) {
+    if(file == NULL) {
+        exit(EXIT_FAILURE);
+    }
 
+    Element *actuel = file->premier;
+
+    while(actuel != NULL) {
+        printf("%d ", actuel->donnee);
+        actuel = actuel->suivant;
+    }
+    printf("\n");
 }
 
 int main() {
+    printf("-------------------");
+    printf("\nPILE - LIFO\n");
     Pile *maPile = initialiser();
 
-    empiler(maPile, 4);
-    empiler(maPile, 8);
-    empiler(maPile, 15);
-    empiler(maPile, 16);
-    empiler(maPile, 23);
-    empiler(maPile, 42);
+    empiler(maPile, (int*)4);
+    empiler(maPile, (int*)8);
+    empiler(maPile, (int*)15);
+    empiler(maPile, (int*)16);
+    empiler(maPile, (int*)23);
+    empiler(maPile, (int*)42);
 
     printf("\nEtat de la pile :\n");
     afficherPile(maPile);
@@ -133,8 +143,27 @@ int main() {
 
     printf("\nEtat de la pile :\n");
     afficherPile(maPile);
+
+    printf("-------------------");
+    printf("\nFILE - FIFO\n");
 
     File *maFile = initialiserFile();
+
+    enfiler(maFile, (int*)4);
+    enfiler(maFile, (int*)8);
+    enfiler(maFile, (int*)15);
+    enfiler(maFile, (int*)16);
+    enfiler(maFile, (int*)23);
+    enfiler(maFile, (int*)42);
+
+    printf("\nEtat de la file :\n");
+    afficherFile(maFile);
+
+    printf("\nJe defile %d\n", (int*)defiler(maFile));
+    printf("Je defile %d\n\n", (int*)defiler(maFile));
+
+    printf("Etat de la file :\n");
+    afficherFile(maFile);
 
     return 0;
 }
